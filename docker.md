@@ -106,3 +106,53 @@ docker stop IdDoContainer : para parar um container
 docker ps -a : ver todos containers, inclusive os que estão parados ou que morreram
 
 docker start IdDoContainer: para rodar o container
+
+docker container exec -it IdDoContainer /bin/sh : união dos comandos -i e -t, o primeiro concede interatividade com o container e o segundo garante um terminal.
+
+<br/>
+
+## Criar a primeira Imagem
+
+Dockerfile
+
+FROM debian
+
+RUN apt-get update && apt-get install nginx
+
+WORKDIR /app
+
+COPY /app/src /app
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+
+ENTRYPOINT app
+
+ENTRYPOINT
+
+Legenda:
+
+FROM: para dizer qual será a imagem base utilizada
+
+RUN: para rodar comandos no terminal
+
+WORKDIR: para definir o diretório padrão do container que será startado
+
+COPY: para copiar de dentro da máquina para dentro do container
+
+EXPOSE: para fazer expose de uma porta que será utilizada para acessar a aplicação
+
+CMD: parar realizar comando dentro da aplicação. Normalmente o comando que irá dar start na aplicação
+
+ENTRYPOINT: similar ao CMD, com a diferença de que o ENTRYPOINT é o principal processo do container. Se o entrypoint morre, não tem mais porque o container existir. Quando o ENTRYPOINT é utilizado, o CMD se torna apenas parâmetro do ENTRYPOINT.
+
+```bash
+docker build -t getting-started .
+```
+
+- Comando para buildar a imagem, o -t é referente a "tag" para adicionar um nome na aplicação, nesse caso chamamos de "getting-started" e o . "ponto" é para informar que o dockerfile está nesse mesmo nível.
+
+docker images ou docker image ls : para listar as images
+
+docker image inspect getting-started:latest
