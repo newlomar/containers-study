@@ -156,3 +156,13 @@ docker build -t getting-started .
 docker images ou docker image ls : para listar as images
 
 docker image inspect getting-started:latest
+
+<br />
+
+## Compartilhar a imagem
+
+Checar passo a passo no docker hub
+
+<br />
+
+## Conhecendo os volumes
