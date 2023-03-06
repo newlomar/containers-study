@@ -58,3 +58,162 @@ this command basically is/have:
 **Pod** is an abstraction of _Container_
 
 Everything below Deployment is handled by Kubernetes
+
+## K8s YAML Configuration File
+
+Each configuration file has 3 parts
+
+1 - Metadata
+
+2 - Specification (spec)
+
+- Atributes of "spec" are specific to the kind!
+
+3 - Status
+
+- Automatically generated and added by Kubernetes!
+
+Kubernetes will always compare what is the desired status and what is the actual status. If they do not match, it will try to fix it. This is the basis of "self-healing" feature that kubernetes provides.
+
+Kubernetes updates the state continuously.
+
+Where does K8s get this status data?
+
+- From etcd
+
+Etc holds the current status of any K8s component!
+
+### Format of configuration file
+
+Yaml
+
+- "**Human friendly\*\*** data serialization standard for all programming languages"
+
+- syntax: strict indentation!
+
+- Yaml validator can be useful to check if the yaml file is correct
+
+- Store the config file with your code or in a specific git repository
+
+#### Template
+
+Is basic a configuration file inside of a configuration file
+
+Has its own metadata and "spec" seciton
+
+The configuration of the templates applies to Pod
+
+It is a blueprint for a pod
+
+### Connecting components (Labels & Sectors & Ports)
+
+Metadata part of the configuration file contains the **Labels**
+
+Specification (spec) part contains the **Selectors**
+
+#### Connecting Deployment to Pods
+
+- Any key-value pair for component
+
+  - example -> app: nginx
+
+- Pods get the label through the template blueprint
+
+- This label is matched by the Selector:
+  - example:
+    ```yaml
+    selector:
+      matchLabels:
+        app: nginx
+    ```
+- In the _spec_ of the **Service** we define a specification which basically makes a connection between Service and deployment or its pods.
+  - example:
+    ```yaml
+    spec:
+      selector:
+        app: nginx
+    ```
+
+### Ports in Service and Pods (how the connection is made)
+
+The Service has a port where the service itself is acessible. So if other service sends a request to this specific service, it has to send it to the port that is defined on this service specification. Then, the service has to know to which pod it should forward the request but also has to know which port this pod is listening, which is the **targetPort**, which should match the **container port**
+
+## Organizing your components with K8s namespaces
+
+What is a namespace?
+
+Organize resources in namespaces, which you can have multiple namespaces in a cluster
+
+Is like a Virtual Cluster inside a cluster
+
+4 namespaces are created by default in a cluster
+
+About each default namespace:
+
+kube-system
+
+- Should not be changed by the user
+- System processes
+- Master and Kubectl processes
+
+kube-public
+
+- Publicely accessible data
+- A configmap, which contains cluster information
+
+kube-node-lease
+
+- hearbeats of nodes
+- each node has associated lease object in namespace
+- determines the availability of a node
+
+default
+
+- resources you created are located here
+
+### Namespaces Use Cases
+
+You could have namespaces for:
+
+- Database
+- Monitoring
+- Elastic Stack
+- Nginx-Ingress
+
+Usecases / Situations
+
+1 - Conflicts: Many teams, same application
+
+- Two teams use the same application name, but with different configuration, and deploy to the same cluster. In this case, the second team would override the first team project. If they use an automated deployment tool they wouldn't even know that they override other team deployment.
+
+2 - Resource Sharing: Staging and Development enviroments
+
+- Both enviroments can use the same resources like Nginx-Ingress Controller or Elastic Stack
+
+3 - Resource Sharing: Blue / Green Deployment
+
+- You have differents version of the application, that will consume the same resources.
+
+4 - Access and Resource Limits on Namespaces
+
+- Grant access to Teams only on their own namespaces. They can't have access to other namespaces.
+
+- Limit CPU, RAM, Storage per NameSpace
+
+### Some Characteristics that must be analyzed when choose to use namespaces
+
+You can't access most resources from another Namespace
+
+- Each NameSpace must define own Configmap
+- Each NameSpace must define own Secret
+
+You can access service in another namespace
+
+Some components can't be created within a namespace, because they live globally in a cluster and you can't isolate them
+
+- Volume
+- Node
+- How to list them:
+  - kubectl api-resources --namespaced==false
+  - To list the components that are bound to namespace:
+    - kubectl api-resources --namespaced==true
